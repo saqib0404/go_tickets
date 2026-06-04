@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var ErrorUserAlreadyExists = errors.New("user with this email already exists")
+var ErrorUserAlreadyExists = errors.New("User with this email already exists")
 
 type Repository interface {
 	CreateUser(user *User) error
