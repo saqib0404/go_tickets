@@ -1,0 +1,24 @@
+package config
+
+import (
+	"os"
+
+	"github.com/joho/godotenv"
+)
+
+type Config struct {
+	Dsn  string
+	Port string
+}
+
+func LoadConfig() *Config {
+	err := godotenv.Load()
+	if err != nil {
+		panic("failed to load .env file")
+	}
+
+	return &Config{
+		Dsn:  os.Getenv("DSN"),
+		Port: os.Getenv("PORT"),
+	}
+}

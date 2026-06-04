@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"go-tickets/internal/config"
+	"go-tickets/internal/user"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -31,7 +33,9 @@ func (cv *CustomValidator) Validate(i any) error {
 }
 
 func main() {
-	dsn := "host=localhost user=postgres password=12345 dbname=gotickets port=5432 sslmode=disable TimeZone=Asia/Shanghai"
+	config := config.LoadConfig()
+
+	dsn := config.Dsn
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		TranslateError: true,
 	})
@@ -52,21 +56,11 @@ func main() {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
-	e.POST("/users", func(c *echo.Context) error {
-		newUser := new(User)
-		if err := c.Bind(newUser); err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]any{"error": err.Error()})
-		}
-		if err := c.Validate(newUser); err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]any{"error": err.Error()})
-		}
-		result := db.Create(newUser)
-		if result.Error != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]any{"error": result.Error.Error()})
-		}
+	userRepository := user.NewRepository(db)
+	userService := user.NewService(userRepository)
+	userhandler := user.NewHandler(userService)
 
-		return c.JSON(http.StatusCreated, newUser)
-	})
+	e.POST("/users", userhandler.CreateUser)
 
 	if err := e.Start(":5000"); err != nil {
 		e.Logger.Error("failed to start server", "error", err)
