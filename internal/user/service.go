@@ -37,3 +37,29 @@ func (s *service) CreateUser(req dto.CreateRequest) (*dto.Response, error) {
 	return &response, nil
 
 }
+
+func (s *service) LoginUser(req dto.LoginRequest) (*dto.Response, error) {
+
+	user, err := s.repo.GetUserByEmail(req.Email)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil {
+		return nil, ErrorInvalidCredentials
+	}
+
+	if err := user.checkPassword(req.Password); err != nil {
+		return nil, ErrorInvalidCredentials
+	}
+
+	response := dto.Response{
+		ID:        user.ID,
+		Name:      user.Name,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt.String(),
+	}
+	return &response, nil
+
+}
