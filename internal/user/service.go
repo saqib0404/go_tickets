@@ -1,14 +1,20 @@
 package user
 
-import "go-tickets/internal/user/dto"
+import (
+	"fmt"
+	"go-tickets/internal/auth"
+	"go-tickets/internal/user/dto"
+)
 
 type service struct {
-	repo Repository
+	repo       Repository
+	jwtService auth.JWTService
 }
 
-func NewService(repo Repository) *service {
+func NewService(repo Repository, jwtService auth.JWTService) *service {
 	return &service{
-		repo: repo,
+		repo:       repo,
+		jwtService: jwtService,
 	}
 }
 
@@ -54,10 +60,16 @@ func (s *service) LoginUser(req dto.LoginRequest) (*dto.Response, error) {
 		return nil, ErrorInvalidCredentials
 	}
 
+	token, err := s.jwtService.GenerateToken(user.ID, req.Email, user.Name)
+	if err != nil {
+		return nil, fmt.Errorf("fail to generate token: %w", err)
+	}
+
 	response := dto.Response{
 		ID:        user.ID,
 		Name:      user.Name,
 		Email:     user.Email,
+		Token:     token,
 		CreatedAt: user.CreatedAt.String(),
 	}
 	return &response, nil
