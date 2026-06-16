@@ -28,3 +28,26 @@ func (s *service) CreateEvent(req dto.CreateRequest) (*dto.Response, error) {
 
 	return event.ToResponse(), nil
 }
+
+func (s *service) GetEvents() ([]*dto.Response, error) {
+	events, err := s.repo.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	var responses []*dto.Response
+	for _, event := range events {
+		responses = append(responses, event.ToResponse())
+	}
+	return responses, nil
+}
+
+func (s *service) GetEventByID(id uint) (*dto.Response, error) {
+	event, err := s.repo.GetByID(id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return event.ToResponse(), nil
+}
