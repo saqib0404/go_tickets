@@ -51,3 +51,32 @@ func (s *service) GetEventByID(id uint) (*dto.Response, error) {
 
 	return event.ToResponse(), nil
 }
+
+func (s *service) UpdateEvent(id uint, req dto.UpdateRequest) (*dto.Response, error) {
+	event, err := s.repo.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	if req.Title != "" {
+		event.Title = req.Title
+	}
+	if req.Description != "" {
+		event.Description = req.Description
+	}
+	if req.Location != "" {
+		event.Location = req.Location
+	}
+	if !req.StartsAt.IsZero() {
+		event.StartsAt = req.StartsAt
+	}
+	if req.Price != 0 {
+		event.Price = req.Price
+	}
+
+	if err := s.repo.Update(event); err != nil {
+		return nil, err
+	}
+
+	return event.ToResponse(), nil
+}

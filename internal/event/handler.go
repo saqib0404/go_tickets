@@ -82,3 +82,37 @@ func (h *handler) GetEventByID(c *echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, event)
 }
+
+func (h *handler) UpdateEvent(c *echo.Context) error {
+	eventID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, httpresponse.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid event ID",
+			Details: err.Error(),
+		})
+	}
+	var req dto.UpdateRequest
+
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, httpresponse.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid request payload",
+			Details: err.Error(),
+		})
+	}
+
+	if err := c.Validate(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, httpresponse.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Validation failed",
+			Details: err.Error(),
+		})
+	}
+
+	response, err := h.service.UpdateEvent(uint(eventID), req)
+	if err != nil {
+		return eventErrorResponse(c, err)
+	}
+	return c.JSON(http.StatusOK, response)
+}
