@@ -11,6 +11,7 @@ var (
 	ErrNotEnoughTickets        = errors.New("Not enough Tickets Available")
 	ErrBookingAlreadyCancelled = errors.New("Booking already cancelled")
 	ErrForbiddenBookingAccess  = errors.New(" you do not own this booking")
+	ErrEventNotFound           = errors.New(" Event is not found")
 )
 
 type Respository interface {

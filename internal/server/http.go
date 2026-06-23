@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"go-tickets/internal/booking"
 	"go-tickets/internal/config"
 	"go-tickets/internal/event"
 	"go-tickets/internal/user"
@@ -26,7 +27,7 @@ func (cv *CustomValidator) Validate(i any) error {
 }
 
 func Start(cfg *config.Config, db *gorm.DB) {
-	db.AutoMigrate(&user.User{}, &event.Event{})
+	db.AutoMigrate(&user.User{}, &event.Event{}, &booking.Booking{})
 
 	e := echo.New()
 	e.Use(middleware.RequestLogger())
@@ -35,8 +36,9 @@ func Start(cfg *config.Config, db *gorm.DB) {
 	e.GET("/", func(c *echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
-	user.RegisterRoutes(e, db)
+	user.RegisterRoutes(e, db, cfg)
 	event.RegisterRoutes(e, db)
+	booking.RegisterRoutes(e, db, cfg)
 
 	port := fmt.Sprintf(":%s", cfg.Port)
 	if err := e.Start(port); err != nil {

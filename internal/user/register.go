@@ -2,15 +2,16 @@ package user
 
 import (
 	"go-tickets/internal/auth"
+	"go-tickets/internal/config"
 	"go-tickets/internal/middleware"
 
 	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
 )
 
-func RegisterRoutes(e *echo.Echo, db *gorm.DB) {
+func RegisterRoutes(e *echo.Echo, db *gorm.DB, cfg *config.Config) {
 	userRepository := NewRepository(db)
-	jwtService := auth.NewJWTService("")
+	jwtService := auth.NewJWTService(cfg.JWTSecret)
 	userService := NewService(userRepository, jwtService)
 	userhandler := NewHandler(userService)
 
